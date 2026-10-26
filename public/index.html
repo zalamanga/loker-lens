@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Penyaring lokal untuk menelusuri teks post lowongan. Mode awal berisi contoh sintetis.">
+  <title>Loker Lens · Telusuri teks lowongan</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#results">Lewati ke hasil</a>
+  <header class="shell header">
+    <a class="brand" href="/" aria-label="Loker Lens, halaman utama"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M11 13.5h18v17H11z"/><path d="M16 13.5V10h8v3.5M11 20h18M18 20v3h4v-3"/></svg></span><span><strong>Loker</strong> Lens</span></a>
+    <p id="modeLabel">Memeriksa mode aplikasi…</p>
+  </header>
+  <main class="shell">
+    <section class="intro" aria-labelledby="pageTitle">
+      <div><p class="eyebrow">Meja riset lowongan</p><h1 id="pageTitle">Cari dari teksnya.</h1><p>Saring post, baca cuplikannya, lalu periksa informasi lengkap di sumber.</p></div>
+      <div class="sync-actions"><button class="primary" id="syncButton" type="button" disabled>Muat contoh</button><button id="refreshButton" type="button" disabled>Periksa data</button></div>
+    </section>
+    <section class="sync-status" aria-label="Status data">
+      <div><strong id="syncTitle">Memeriksa cache lokal</strong><p id="syncMessage" role="status">Belum ada sinkronisasi yang dijalankan.</p><p class="muted" id="savedLabel">Belum ada data terkonfirmasi.</p></div>
+      <div class="progress-area"><progress id="syncProgress" max="1" value="0" aria-label="Halaman post yang dibaca" hidden></progress><p id="progressLabel"></p><div class="small-actions"><button id="cancelButton" type="button" hidden>Batalkan pembacaan</button><button id="reconcileButton" type="button" hidden>Periksa hasil simpan</button><button id="retryStartButton" type="button" hidden>Ulangi permintaan yang sama</button></div></div>
+    </section>
+    <p class="error-message" id="networkError" role="alert" hidden></p>
+    <p class="muted" id="bootMessage" role="status">Memuat antarmuka. Jika pesan ini tetap tampil, muat ulang halaman dan periksa apakah server serta berkas JavaScript dapat diakses.</p>
+    <details class="recovery" id="damagedCache" hidden><summary>Cache tersimpan tidak dapat dibaca</summary><p id="damagedMessage"></p><label><input id="replaceDamaged" type="checkbox"> Saya setuju menyimpan salinan cache rusak sebelum menggantinya.</label></details>
+    <dl class="metrics" aria-label="Ringkasan data tersimpan">
+      <div><dt>Post tersimpan</dt><dd id="totalJobs">–</dd></div>
+      <div><dt>Diubah ≤ 7 hari</dt><dd id="recentJobs">–</dd></div>
+      <div><dt>Lokasi pada post</dt><dd id="locationCount">–</dd></div>
+      <div><dt>Menyebut fresh graduate</dt><dd id="freshGraduate">–</dd></div>
+    </dl>
+    <p class="muted dataset-note" id="datasetNote">Ringkasan menggambarkan metadata dan teks post, bukan kepastian lowongan masih dibuka.</p>
+    <div class="workspace">
+      <section class="results" id="results" aria-labelledby="resultsTitle" tabindex="-1">
+        <div class="section-heading"><h2 id="resultsTitle">Telusuri post</h2><span id="resultCount" aria-live="polite">Belum ada data</span></div>
+        <fieldset class="filter-controls" id="filterControls" aria-label="Filter post" disabled><div class="filters">
+          <label class="search-field">Cari judul atau isi<input type="search" id="searchInput" maxlength="200" placeholder="Contoh: React atau administrasi" autocomplete="off"></label>
+          <label>Kategori<select id="categoryFilter"><option value="">Semua kategori</option></select></label>
+          <label>Lokasi<select id="locationFilter"><option value="">Semua lokasi</option></select></label>
+          <label>Sinyal bidang<select id="interestFilter"><option value="">Semua bidang</option><option value="it-web">IT &amp; Web Development</option><option value="teknik-informatika">Teknik Informatika</option><option value="human-resources">Human Resources</option></select></label>
+          <label class="keyword-field">Kata atau frasa tambahan<input id="keywordInput" maxlength="500" placeholder="React, HRD, database" aria-describedby="keywordHelp" autocomplete="off"><span id="keywordHelp" class="help">Pisahkan dengan koma. Hasil memuat salah satu frasa; maksimal 12.</span></label>
+          <label>Diubah mulai<input id="dateFrom" type="date"></label><label>Sampai tanggal<input id="dateTo" type="date"></label>
+          <label>Urutkan<select id="sortSelect"><option value="latest">Terakhir diubah</option><option value="oldest">Lebih lama dahulu</option><option value="az">Judul A–Z</option></select></label>
+        </div>
+        <div class="filter-footer"><button class="text-button" id="clearFilters" type="button">Reset semua filter</button><span class="muted">Tanggal mengikuti Asia/Jakarta.</span></div></fieldset>
+        <p class="error-message" id="filterError" role="alert" hidden></p>
+        <div class="empty-state" id="emptyState"><h3>Meja masih kosong.</h3><p>Muat contoh sintetis untuk mencoba pencarian dan filter.</p></div>
+        <div id="jobList" class="job-list"></div>
+        <nav id="pagination" class="pagination" aria-label="Halaman hasil"></nav>
+      </section>
+      <aside class="insights" aria-labelledby="insightsTitle"><p class="eyebrow">Di dalam data</p><h2 id="insightsTitle">Sebaran kategori</h2><p class="muted">Satu post dapat memiliki beberapa kategori. Pilih nama untuk menyaring.</p><div id="insightBars"><p>Ringkasan muncul setelah data dimuat.</p></div><div class="reading-note"><h3>Cara membaca hasil</h3><p>Sinyal bidang berasal dari kata kunci, bukan penilaian kecocokan pelamar.</p><p>Cuplikan diambil dari teks halaman. Isi lampiran tidak diunduh.</p></div></aside>
+    </div>
+    <footer><p>Loker Lens · Riset lokal, tanpa akun atau pengiriman lamaran.</p><p>Periksa tanggal, persyaratan, dan status lowongan pada sumbernya.</p></footer>
+  </main>
+  <noscript><p class="shell error-message">Aktifkan JavaScript untuk memakai penyaring. Halaman ini tidak memuat data secara otomatis.</p></noscript>
+</body>
+</html>

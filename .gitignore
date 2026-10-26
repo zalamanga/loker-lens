@@ -1,0 +1,10 @@
+.data/
+.test-cache/
+node_modules/
+npm-debug.log*
+*.log
+.edge-preview*/
+dashboard.png
+dashboard-loaded.png
+dashboard-mobile.png
+dashboard-mobile-final.png
