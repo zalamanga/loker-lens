@@ -4,7 +4,7 @@
 
 Design read: meja pencarian dan catatan lamaran pribadi, meneruskan tema terang hijau/krem/limau aplikasi ini; ENERGY 1 / RHYTHM 2 / MOTION 1. Reviewer utama membaca source, memeriksa hasil pengujian, menjalankan pencarian nyata, dan melihat screenshot desktop/ponsel serta fixture secara langsung.
 
-Hard Gate PASS: 85 tes Node lulus; 15 skenario browser memakai fixture yang diberi label, tujuh keadaan layout/zoom tanpa overflow, dan satu pencarian nyata menghasilkan 20 kartu Indonesia. Tombol, dialog konfirmasi, pembatalan, kondisi kosong/error, fokus dan target 44 piksel diperiksa. JobStreet nyata dan Glints 403 dibedakan; tidak ada klaim auto-apply, kecocokan AI, atau angka keberhasilan rekaan.
+Hard Gate PASS: 87 tes Node lulus lokal dan CI Windows/Linux; 15 skenario browser memakai fixture yang diberi label, tujuh keadaan layout/zoom tanpa overflow, dan satu pencarian nyata menghasilkan 20 kartu Indonesia. Tombol, dialog konfirmasi, pembatalan, kondisi kosong/error, fokus dan target 44 piksel diperiksa. JobStreet nyata dan Glints 403 dibedakan; tidak ada klaim auto-apply, kecocokan AI, atau angka keberhasilan rekaan.
 
 Purpose-Gate PASS: warna dan font sistem meneruskan identitas utilitas riset; limau menandai pencarian utama, panel samping mengelompokkan kuota dan antrean. Border memisahkan record dan tugas. Tidak ada aset merek baru, efek dekoratif, atau section promosi. Warna teks terukur paling rendah 5,29:1 pada permukaan yang digunakan; border kontrol 3,83:1 atau lebih dan fokus 5,47:1 atau lebih.
 

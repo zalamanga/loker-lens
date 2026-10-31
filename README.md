@@ -8,6 +8,8 @@ Pencarian JobStreet Indonesia lewat API scraper lokal, antrean maksimal **20 pil
 
 Screenshot di atas diambil dari aplikasi berjalan pada 1 November 2026. Hasil bergantung pada waktu pencarian dan bukan jaminan lowongan masih dibuka. [Tampilan ponsel](docs/screenshots/jobstreet-mobile.png) dan [status Glints yang belum tersedia](docs/screenshots/glints-status.png) juga diambil dari aplikasi.
 
+**Verifikasi:** 87 tes lulus lokal dan pada [CI Windows/Linux](https://github.com/zalamanga/loker-lens/actions/runs/41225505847), ditambah 15 skenario browser lokal serta koneksi JobStreet nyata. Source yang diuji CI adalah `b169595c0e33574510f9bba099e08a4d05fdd6e3`; commit sesudahnya hanya memperbarui dokumentasi. [Cakupan dan batas pengujian](docs/BOARD-VERIFICATION.md).
+
 ## Pencarian API dan antrean harian
 
 Siapkan Node.js **22.14+**, Python **3.13 x64**, Git, dan PowerShell. Dari direktori proyek, jalankan dua terminal:

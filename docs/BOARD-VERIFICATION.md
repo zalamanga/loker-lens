@@ -4,11 +4,13 @@ Diperiksa pada 1 November 2026 WIB, Windows, Node 22.14.0, Python 3.13.1, dan Mi
 
 ## Tes otomatis
 
-`node --test` meluluskan **85 tes**, tanpa kegagalan, pembatalan, atau skip. Sebanyak 51 tes sebelumnya tetap lulus; tambahan terdiri dari 18 tes konektor/API/HTTP, sembilan tes ledger SQLite, dan tujuh tes kolektor harian. Tes provider menggunakan transport dan data sintetis, bukan traffic live.
+`node --test` meluluskan **87 tes**, tanpa kegagalan, pembatalan, atau skip. Sebanyak 51 tes sebelumnya tetap lulus; tambahan terdiri dari 18 tes konektor/API/HTTP, sembilan tes ledger SQLite, tujuh tes kolektor harian, dan dua regresi portabilitas cache. Tes provider menggunakan transport dan data sintetis, bukan traffic live. [CI yang lulus](https://github.com/zalamanga/loker-lens/actions/runs/41225505847) memeriksa source `b169595c0e33574510f9bba099e08a4d05fdd6e3` pada Windows dan Linux, masing-masing 87 tes lulus.
 
 Kasus mencakup parameter Indonesia, schema drift, duplikat sponsored card, response JSON/batas byte, body yang dibatalkan, timeout, cache, URL layanan loopback, kartu yang dipalsukan, Origin dan akses berkas privat. Uji konkurensi SQLite mencoba 80 penambahan melalui koneksi worker berbeda dan menerima tepat 20. Restart, pergantian hari WIB, transaksi rollback, riwayat immutable, dan database rusak juga diperiksa.
 
 Kolektor diuji ketika kuota penuh, melintasi beberapa halaman, melewati riwayat/duplikat, mencapai batas lima halaman, mengalami race dengan koneksi lain, dan gagal setelah sebagian pilihan tersimpan. Tidak ada tes yang mengirim lamaran ke penyedia.
+
+Run CI pertama mengungkap perbedaan identitas volume antara path stat dan descriptor stat pada Windows. Cleanup kini membandingkan identitas descriptor dengan descriptor dan memeriksa kestabilan path secara terpisah. Tes tambahan mencakup perbedaan itu dan penolakan marker yang diganti dengan inode berbeda walaupun isi sama; run final lulus kedua OS. Pemeriksaan ini tidak diklaim atomik terhadap pergantian path oleh proses penyerang.
 
 ## Browser dengan fixture
 
