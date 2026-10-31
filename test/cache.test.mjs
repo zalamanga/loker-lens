@@ -191,3 +191,30 @@ test('owner release excludes replacement while the marker read awaits', async (t
   await assert.rejects(cache.replace(second), (error) => error.code === 'cache_blocked');
   assert.deepEqual((await f.open()).data, first);
 });
+
+test('cleanup compares descriptor identities when Windows path stat reports a different volume id', async (t) => {
+  const f = await fixture(t);
+  const adapter = { ...fs, async open(file, ...args) {
+    const handle = await fs.open(file, ...args);
+    return {
+      async stat(options) { const stat = await handle.stat(options); stat.dev += 1000n; return stat; },
+      writeFile: handle.writeFile.bind(handle), sync: handle.sync.bind(handle), close: handle.close.bind(handle),
+    };
+  } };
+  const cache = await f.open(adapter);
+  await cache.replace(first);
+  assert.deepEqual(await cache.close(), { closed: true, warnings: [] });
+  assert.deepEqual((await f.open(adapter)).data, first);
+});
+
+test('cleanup preserves a different marker inode even when its contents match the old owner', async (t) => {
+  const f = await fixture(t); const cache = await f.open();
+  const marker = path.join(f.directory, '.loker-lens.lock');
+  const previous = path.join(f.directory, 'previous-owner-marker');
+  assert.equal(path.dirname(previous), f.directory);
+  const bytes = await fs.readFile(marker);
+  await fs.rename(marker, previous);
+  await fs.writeFile(marker, bytes, { flag: 'wx' });
+  assert.deepEqual((await cache.close()).warnings, ['Penanda pemilik cache belum dilepas. Cache tetap dipertahankan.']);
+  assert.deepEqual(await fs.readFile(marker), bytes);
+});
