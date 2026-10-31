@@ -6,6 +6,8 @@ import { readConfiguration } from './lib/config.mjs';
 import { SafeCache } from './lib/cache.mjs';
 import { snapshotDecoder } from './lib/snapshot.mjs';
 import { createApplication } from './lib/application.mjs';
+import { createBoard } from './lib/board.mjs';
+import { ApplicationQueue } from './lib/board-store.mjs';
 import { Problem, publicFailure } from './lib/errors.mjs';
 import { isUUID, record } from './public/model.mjs';
 
@@ -16,6 +18,9 @@ const STATIC = new Map([
   ['/model.mjs', ['model.mjs', 'text/javascript; charset=utf-8']],
   ['/client.mjs', ['client.mjs', 'text/javascript; charset=utf-8']],
   ['/styles.css', ['styles.css', 'text/css; charset=utf-8']],
+  ['/pencarian', ['board.html', 'text/html; charset=utf-8']],
+  ['/board.js', ['board.js', 'text/javascript; charset=utf-8']],
+  ['/board.css', ['board.css', 'text/css; charset=utf-8']],
 ]);
 const HEADERS = {
   'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer',
@@ -34,12 +39,12 @@ function perimeter(request) {
   }
   if (request.method === 'GET' && (request.headers['transfer-encoding'] !== undefined || (request.headers['content-length'] !== undefined && request.headers['content-length'] !== '0'))) throw new Problem('body', 'Permintaan baca tidak menerima isi.', 400);
 }
-async function jsonBody(request) {
+async function jsonBody(request, maximum = 2048) {
   if (!/^application\/json(?:\s*;\s*charset=utf-8)?$/i.test(request.headers['content-type'] ?? '')) throw new Problem('content_type', 'Gunakan isi JSON UTF-8.', 415);
   const length = request.headers['content-length'];
-  if (length !== undefined && (!/^\d+$/.test(length) || Number(length) > 2048)) throw new Problem('body_capacity', 'Isi permintaan melebihi 2048 byte.', 413);
+  if (length !== undefined && (!/^\d+$/.test(length) || Number(length) > maximum)) throw new Problem('body_capacity', `Isi permintaan melebihi ${maximum} byte.`, 413);
   const chunks = []; let size = 0;
-  for await (const chunk of request) { size += chunk.length; if (size > 2048) throw new Problem('body_capacity', 'Isi permintaan melebihi 2048 byte.', 413); chunks.push(chunk); }
+  for await (const chunk of request) { size += chunk.length; if (size > maximum) throw new Problem('body_capacity', `Isi permintaan melebihi ${maximum} byte.`, 413); chunks.push(chunk); }
   try { return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(chunks, size))); }
   catch { throw new Problem('json', 'Isi JSON tidak valid.', 400); }
 }
@@ -50,7 +55,7 @@ function operationBody(body) {
 }
 function escape(value) { return value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]); }
 
-export function createServer({ application, publicDirectory = path.join(ROOT, 'public') }) {
+export function createServer({ application, board = null, publicDirectory = path.join(ROOT, 'public') }) {
   if (!application || !path.isAbsolute(publicDirectory)) throw new TypeError('Application and absolute public directory required.');
   const server = http.createServer({ requestTimeout: 10_000, headersTimeout: 10_000, keepAliveTimeout: 5000, maxHeaderSize: 8192 }, async (request, response) => {
     try {
@@ -59,6 +64,22 @@ export function createServer({ application, publicDirectory = path.join(ROOT, 'p
       if (!request.url?.startsWith('/') || request.url.startsWith('//') || request.url.includes('\\')) throw new Problem('path', 'Alamat permintaan tidak valid.', 400);
       const url = new URL(request.url, 'http://127.0.0.1');
       if (url.pathname !== '/api/status' && url.search) throw new Problem('query', 'Rute ini tidak menerima parameter.', 400);
+      if (url.pathname.startsWith('/api/board/')) {
+        if (!board) throw new Problem('board_unavailable', 'Pencarian lintas sumber belum aktif pada server ini.', 503);
+        if (request.method === 'GET' && url.pathname === '/api/board/status') return send(response, 200, board.status());
+        const routes = ['/api/board/search', '/api/board/queue', '/api/board/mark-applied', '/api/board/remove'];
+        if (request.method !== 'POST' || !routes.includes(url.pathname)) throw new Problem('route', 'Rute tidak ditemukan.', 404);
+        const body = await jsonBody(request, url.pathname === '/api/board/queue' ? 16384 : 2048);
+        if (url.pathname === '/api/board/search') {
+          const controller = new AbortController();
+          const disconnected = () => { if (!response.writableEnded) controller.abort(); };
+          response.once('close', disconnected);
+          try { const result = await board.search(body, controller.signal); if (!response.destroyed) return send(response, 200, result); return; }
+          finally { response.removeListener('close', disconnected); }
+        }
+        const result = url.pathname === '/api/board/queue' ? board.add(body) : url.pathname === '/api/board/mark-applied' ? board.markApplied(body) : board.remove(body);
+        return send(response, 200, result);
+      }
       if (request.method === 'GET') {
         if (STATIC.has(url.pathname)) {
           const [name, type] = STATIC.get(url.pathname);
@@ -96,13 +117,22 @@ export async function main() {
   const config = readConfiguration(ROOT);
   const store = await SafeCache.open(config.dataRoot, snapshotDecoder(config.mode));
   const application = createApplication({ config, store });
-  const server = createServer({ application });
+  let board;
+  let queue;
+  try {
+    queue = new ApplicationQueue({ filename: path.join(ROOT, '.data', 'board', 'applications.sqlite') });
+    board = createBoard({ queue, apiURL: process.env.JOBSTREET_API_URL });
+  }
+  catch (error) { queue?.close(); await application.close(); throw error; }
+  const server = createServer({ application, board });
   try { await new Promise((resolve, reject) => { server.once('error', reject); server.listen(config.port, '127.0.0.1', resolve); }); }
-  catch (error) { await application.close(); throw error; }
+  catch (error) { board.close(); await application.close(); throw error; }
   console.log(`Loker Lens · ${config.mode === 'demo' ? 'contoh sintetis' : 'sumber publik, akses manual'} · http://127.0.0.1:${config.port}`);
+  console.log(`Pencarian API dan antrean: http://127.0.0.1:${config.port}/pencarian`);
   let closing = false;
   const close = async () => {
     if (closing) return; closing = true;
+    board.close();
     server.close(); server.closeIdleConnections();
     try { const result = await application.close(); for (const warning of result.warnings) console.error(warning); }
     catch { console.error('Penutupan cache belum dapat dipastikan; jangan hapus penanda pemilik tanpa pemeriksaan.'); process.exitCode = 1; }

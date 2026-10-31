@@ -1,5 +1,59 @@
 # Loker Lens
 
+Pencarian JobStreet Indonesia lewat API scraper lokal, antrean maksimal **20 pilihan per hari WIB**, dan catatan lamaran yang tetap tersimpan setelah restart. Halaman riset post lama tetap tersedia di halaman utama.
+
+**Status konektor:** JobStreet sudah diuji dengan 20 kartu lowongan nyata. Glints belum tersedia karena pemeriksaan API mendapat HTTP 403. Program menampilkan keadaan ini secara langsung; tidak menggantinya dengan data demo. Pengiriman lamaran dilakukan sendiri pada situs sumber. Kolektor harian mengisi antrean, bukan mengirim formulir lamaran.
+
+![Pencarian JobStreet nyata dan antrean yang masih kosong](docs/screenshots/jobstreet-api.png)
+
+Screenshot di atas diambil dari aplikasi berjalan pada 1 November 2026. Hasil bergantung pada waktu pencarian dan bukan jaminan lowongan masih dibuka. [Tampilan ponsel](docs/screenshots/jobstreet-mobile.png) dan [status Glints yang belum tersedia](docs/screenshots/glints-status.png) juga diambil dari aplikasi.
+
+## Pencarian API dan antrean harian
+
+Siapkan Node.js **22.14+**, Python **3.13 x64**, Git, dan PowerShell. Dari direktori proyek, jalankan dua terminal:
+
+```powershell
+# Terminal 1: setup pertama otomatis, lalu API scraper lokal berjalan.
+.\scripts\Start-JobStreet.ps1
+```
+
+```powershell
+# Terminal 2: dashboard dan REST API Loker Lens.
+.\scripts\Start.ps1
+```
+
+Buka **http://127.0.0.1:8132/pencarian**. Isi kata kunci dan lokasi opsional, cari, baca informasi di sumber, kemudian tambahkan pilihan ke antrean. **Tandai sudah dilamar** memerlukan konfirmasi bahwa kamu sudah mengirimnya sendiri; tombol ini hanya mencatat status lokal. Ctrl+C pada masing-masing terminal menghentikan layanannya.
+
+API JobStreet lokal memakai sumber [omkarcloud/jobstreet-scraper](https://github.com/omkarcloud/jobstreet-scraper) pada revisi tetap. Ini API pihak ketiga yang membungkus scraper, bukan API resmi JobStreet. [Catatan layanan](docs/JOBSTREET-SERVICE.md) menjelaskan revisi, lisensi MIT upstream, dependensi terkunci, transport, dan batas akses. Cache, virtual environment, dan berkas sementara berada di `.local/` pada direktori proyek; data pribadi antrean berada di `.data/board/`. Keduanya diabaikan Git dan tidak disajikan oleh HTTP.
+
+Antrean menggunakan SQLite bawaan Node, tanpa instalasi database tambahan. Node 22.14 masih menampilkan peringatan experimental untuk modul ini. Identitas `provider + jobId` mencegah duplikat setelah restart. Penambahan dan penandaan memakai transaksi yang sama untuk membatasi total pilihan terjadwal dan lamaran tercatat menjadi 20 per hari WIB, termasuk dari proses kolektor lain. Riwayat yang sudah dilamar tetap disimpan; antrean yang belum dilamar boleh dihapus. Maksimal 2.000 catatan disimpan tanpa penghapusan riwayat otomatis.
+
+## Pengumpulan otomatis harian
+
+Jalankan sekali untuk menyiapkan layanan, tanpa mengambil lowongan:
+
+```powershell
+.\scripts\Start-JobStreet.ps1 -SetupOnly
+```
+
+Kemudian gunakan kriteriamu sendiri. Contoh berikut mengisi sisa kuota antrean dengan hasil terbaru yang cocok dengan pencarian penyedia, melewati duplikat dan riwayat lamaran:
+
+```powershell
+node scripts/Collect-Daily.mjs --query "backend developer" --location "Jakarta"
+```
+
+Kolektor memeriksa paling banyak lima halaman, masing-masing maksimal 20 kartu, dan tidak mengambil data lagi bila kuota hari itu penuh. Hasil dipilih menurut urutan penyedia, tanpa penilaian AI terhadap CV atau pengalaman. Layanan JobStreet milik kolektor dimulai bila perlu dan dihentikan setelah selesai; layanan yang sudah berjalan tidak dihentikan. Kegagalan sumber menghasilkan kode keluar gagal dan tidak menghapus pilihan yang sudah tersimpan.
+
+Untuk mendaftarkan jadwal Windows setelah kata kunci, lokasi, dan waktu sudah kamu tentukan:
+
+```powershell
+.\scripts\Install-DailyTask.ps1 -Query "backend developer" -Location "Jakarta" -At '09:00'
+```
+
+Skrip tersebut membuat task `LokerLens-PencarianHarian` dan berkas kriteria lokal. **Task belum diaktifkan otomatis oleh pembuatan proyek ini.** Komputer harus menyala, terhubung internet, dan pengguna login. Skrip mengharapkan zona waktu komputer UTC+7; kuota selalu memakai Asia/Jakarta. Periksa atau hapus task melalui Windows Task Scheduler. [Panduan API dan alur kode](docs/BOARD-API.md) mencakup kontrak REST, file, transaksi, dan batas yang belum didukung.
+
+## Riset post dari proyek sebelumnya
+
 Penyaring teks post lowongan yang berjalan di komputer sendiri. Cari judul atau isi, gabungkan filter, lalu baca cuplikan dan persyaratan tanpa berpindah halaman. Data disimpan setelah berkas cache terverifikasi.
 
 **Saat pertama dijalankan, aplikasi memakai mode demo dengan 24 post rekaan.** Mode ini tidak menghubungi situs lowongan. Adapter DISNAKERJA.COM tersedia sebagai pilihan terpisah untuk pembacaan manual.
@@ -23,7 +77,7 @@ Elemen kartu hasil selebar 358 piksel pada viewport Chrome 390 piksel. Gambar in
 
 ## Jalankan
 
-Butuh **Node.js 22.13 atau lebih baru**. Tidak ada dependensi npm, database, akun, atau API key yang perlu dipasang.
+Untuk halaman riset lama, gunakan **Node.js 22.14 atau lebih baru**. Tidak ada dependensi npm, server database, akun, atau API key yang perlu dipasang. Layanan Python hanya diperlukan untuk pencarian JobStreet.
 
 ```powershell
 git clone https://github.com/zalamanga/loker-lens.git

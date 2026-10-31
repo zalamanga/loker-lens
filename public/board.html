@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Cari lowongan dari sumber yang terhubung dan susun antrean lamaran harian lokal.">
+  <title>Pencarian sumber · Loker Lens</title>
+  <link rel="stylesheet" href="/board.css">
+  <script type="module" src="/board.js"></script>
+</head>
+<body class="board-page">
+  <a class="board-skip" href="#pencarian">Lewati ke pencarian</a>
+  <header class="board-shell board-header">
+    <a href="/">Kembali ke Loker Lens</a>
+    <p>Pencarian sumber</p>
+  </header>
+  <main class="board-shell">
+    <div class="board-intro">
+      <h1>Cari, periksa, antrekan.</h1>
+      <p>Cari lowongan dari sumber yang tersedia, baca di sumbernya, lalu simpan pilihan untuk dilamar sendiri.</p>
+    </div>
+    <div class="board-workspace">
+      <section class="board-search" id="pencarian" aria-labelledby="searchTitle" tabindex="-1">
+        <h2 id="searchTitle">Cari lowongan</h2>
+        <form id="searchForm" class="board-form">
+          <label for="providerInput">Sumber
+            <select id="providerInput" name="provider" aria-describedby="providerNote" disabled>
+              <option value="jobstreet">JobStreet</option>
+              <option value="glints">Glints</option>
+            </select>
+          </label>
+          <label class="board-keyword" for="queryInput">Kata kunci
+            <input id="queryInput" name="query" type="search" required minlength="1" maxlength="120" autocomplete="off" placeholder="Jabatan atau keterampilan" disabled>
+          </label>
+          <label for="locationInput"><span>Lokasi <span class="board-label-hint">(opsional)</span></span>
+            <input id="locationInput" name="location" type="search" maxlength="100" autocomplete="off" placeholder="Kota atau wilayah" disabled>
+          </label>
+          <div class="board-form-actions">
+            <button id="searchButton" class="board-primary" type="submit" disabled>Cari lowongan</button>
+            <button id="cancelSearch" type="button" hidden>Batalkan pencarian</button>
+          </div>
+          <p id="providerNote" class="board-source-note">Memeriksa sambungan sumber…</p>
+        </form>
+        <p id="searchError" class="board-error" role="alert" hidden></p>
+        <div class="board-result-heading">
+          <h2 id="resultsTitle">Hasil pencarian</h2>
+          <p id="resultCount" class="board-muted"></p>
+        </div>
+        <p id="searchMessage" class="board-result-context" role="status">Pilih sumber dan isi kata kunci untuk memulai.</p>
+        <p id="sourceNote" class="board-source-note" hidden></p>
+        <div id="searchResults" class="board-results" aria-labelledby="resultsTitle" aria-busy="false"></div>
+        <nav id="resultPagination" class="board-pagination" aria-label="Halaman hasil pencarian" hidden>
+          <button id="previousPage" type="button">Halaman sebelumnya</button>
+          <span id="pageLabel"></span>
+          <button id="nextPage" type="button">Halaman berikutnya</button>
+        </nav>
+      </section>
+      <aside class="board-queue" aria-labelledby="queueTitle">
+        <div class="board-queue-heading">
+          <h2 id="queueTitle">Antrean lamaran</h2>
+          <button id="refreshStatus" type="button" disabled>Periksa antrean</button>
+        </div>
+        <div class="board-quota" aria-label="Batas harian">
+          <p id="quotaDay" class="board-muted">Batas harian mengikuti WIB.</p>
+          <p id="quotaValue" class="board-quota-value">Memuat batas harian…</p>
+          <p id="quotaNote" class="board-muted">Maksimal 20 pilihan per hari.</p>
+        </div>
+        <p class="board-tracking-note">Lamaran dikirim sendiri di situs sumber. Tombol “Tandai sudah dilamar” hanya mencatat status.</p>
+        <p id="statusMessage" class="board-muted" role="status">Memuat antrean tersimpan…</p>
+        <p id="queueError" class="board-error" role="alert" hidden></p>
+        <div id="pendingQueue" class="board-pending" aria-busy="true"></div>
+        <details id="applicationHistory" class="board-history" hidden>
+          <summary id="historySummary">Riwayat lamaran</summary>
+          <p class="board-muted">Catatan lamaran disimpan agar lowongan yang sama tidak masuk lagi.</p>
+          <div id="historyList"></div>
+        </details>
+      </aside>
+    </div>
+    <footer class="board-footer">
+      <p>Loker Lens · Pencarian dan catatan lokal.</p>
+      <p>Periksa persyaratan dan status lowongan pada sumbernya.</p>
+    </footer>
+  </main>
+  <dialog id="appliedDialog" class="board-dialog" aria-labelledby="appliedTitle" aria-describedby="appliedDescription">
+    <form id="appliedForm">
+      <h2 id="appliedTitle">Catat sebagai sudah dilamar?</h2>
+      <p id="appliedJob" class="board-dialog-job"></p>
+      <p id="appliedDescription">Ini hanya mengubah catatan lokal. Loker Lens tidak mengirim lamaran ke perusahaan atau situs sumber.</p>
+      <label class="board-check" for="appliedConfirm"><input id="appliedConfirm" type="checkbox" required> Saya sudah mengirim lamaran sendiri untuk lowongan ini.</label>
+      <div class="board-dialog-actions">
+        <button id="closeAppliedDialog" type="button" autofocus>Kembali</button>
+        <button id="confirmApplied" class="board-primary" type="submit" disabled>Tandai sudah dilamar</button>
+      </div>
+    </form>
+  </dialog>
+  <noscript><p class="board-shell board-error">Aktifkan JavaScript untuk mencari lowongan dan membaca antrean.</p></noscript>
+</body>
+</html>

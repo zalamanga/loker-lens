@@ -1,5 +1,19 @@
 # Delivery gate
 
+## Perluasan API dan antrean, 1 November 2026
+
+Design read: meja pencarian dan catatan lamaran pribadi, meneruskan tema terang hijau/krem/limau aplikasi ini; ENERGY 1 / RHYTHM 2 / MOTION 1. Reviewer utama membaca source, memeriksa hasil pengujian, menjalankan pencarian nyata, dan melihat screenshot desktop/ponsel serta fixture secara langsung.
+
+Hard Gate PASS: 85 tes Node lulus; 15 skenario browser memakai fixture yang diberi label, tujuh keadaan layout/zoom tanpa overflow, dan satu pencarian nyata menghasilkan 20 kartu Indonesia. Tombol, dialog konfirmasi, pembatalan, kondisi kosong/error, fokus dan target 44 piksel diperiksa. JobStreet nyata dan Glints 403 dibedakan; tidak ada klaim auto-apply, kecocokan AI, atau angka keberhasilan rekaan.
+
+Purpose-Gate PASS: warna dan font sistem meneruskan identitas utilitas riset; limau menandai pencarian utama, panel samping mengelompokkan kuota dan antrean. Border memisahkan record dan tugas. Tidak ada aset merek baru, efek dekoratif, atau section promosi. Warna teks terukur paling rendah 5,29:1 pada permukaan yang digunakan; border kontrol 3,83:1 atau lebih dan fokus 5,47:1 atau lebih.
+
+Liveliness PASS: pencarian menjadi fokus, hasil mendapatkan kolom lebih lebar, dan antrean merupakan tugas pendamping. Susunan menumpuk pada ponsel; ritme form, hasil, dan catatan mengikuti pekerjaan. Tidak ada animasi otomatis. Tema terang yang sudah ada dipertahankan; tidak ada toggle yang tidak berfungsi.
+
+Craftsmanship PASS: cap 20, transaksi konkuren, restart, rollover WIB, duplicate, pembatalan, error sumber dan pemulihan diuji. Reviewer utama melihat screenshot nyata dan fixture setelah pengujian. Sumber live JobStreet diuji terpisah dari transport sintetis. Jadwal Windows disediakan untuk aktivasi pengguna dan belum diregistrasikan pada komputer ini. Cakupan serta batasnya ada di [verifikasi perluasan](docs/BOARD-VERIFICATION.md).
+
+## Catatan verifikasi versi sebelumnya
+
 Status: **PASS**. Pemeriksaan ini ditulis langsung oleh reviewer utama setelah membaca sumber, menjalankan aplikasi, meninjau bukti pengujian, dan melihat ketiga screenshot asli. Arah sebelum implementasi: ENERGY 1 / RHYTHM 2 / MOTION 1.
 
 ## Hard gate
